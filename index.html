@@ -1,1873 +1,306 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Hexera Status</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
-
-<!-- Firebase -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, serverTimestamp, getDoc, where }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// 🔧 VLOŽ SEM SVOJU FIREBASE CONFIG:
-const cfg = {
-  apiKey:            "AIzaSyBOU9NRRJ6WO7EtPm2kfp3xVdqr-syr5ko",
-  authDomain:        "hexera-6f2b4.firebaseapp.com",
-  projectId:         "hexera-6f2b4",
-  storageBucket:     "hexera-6f2b4.firebasestorage.app",
-  messagingSenderId: "261178002521",
-  appId:             "1:261178002521:web:1cdbfdcf0bf233ef12b548"
-};
-
-window._fb = false;
-try {
-  const app = initializeApp(cfg);
-  const db  = getFirestore(app);
-  window._db  = db;
-  window._fns = { collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, serverTimestamp, getDoc, where };
-  window._fb  = true;
-} catch(e){ console.warn('Firebase:', e.message); }
-setTimeout(()=>document.dispatchEvent(new Event('fb')), 300);
-</script>
-
+<meta charset="utf-8">
+<meta name="description" content="Keksland – Discord komunita s viac ako 500 členmi. Pravidlá, tím, roly a support na jednom mieste.">
+<meta name="theme-color" content="#134b5c">
+<meta property="og:type" content="website"><meta property="og:title" content="Keksland – Discord server"><meta property="og:description" content="Pripoj sa ku komunite s viac ako 500 členmi.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🍪%3C/text%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keksland – Discord server</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap">
 <style>
-/* ═══════════════════════════
-   DISCORD EXACT COLOR SYSTEM
-═══════════════════════════ */
 :root{
-  --white:   #ffffff;
-  --black:   #000000;
-  --primary-630: #1e2124;
-  --primary-600: #2c2f33;
-  --primary-560: #36393f;
-  --primary-530: #40444b;
-  --primary-500: #4f545c;
-  --primary-430: #72767d;
-  --primary-400: #8e9297;
-  --primary-330: #b9bbbe;
-  --primary-200: #dcddde;
-  --primary-130: #f2f3f5;
-  --primary-100: #f6f6f6;
-
-  --blurple:      #5865f2;
-  --blurple-dark: #4752c4;
-  --blurple-560:  #454fbf;
-  --green:        #3ba55c;
-  --green-360:    #2d7d46;
-  --yellow:       #faa61a;
-  --red:          #ed4245;
-  --orange:       #f96854;
-
-  --status-green:  #43b581;
-  --status-yellow: #faa61a;
-  --status-red:    #f04747;
-  --status-gray:   #747f8d;
-
-  /* discordstatus.com uses white bg with dark text — but dark mode */
-  --bg:        #1e2124;
-  --bg-card:   #2c2f33;
-  --bg-input:  #202225;
-  --bg-hover:  #36393f;
-  --border:    rgba(255,255,255,.06);
-  --border2:   rgba(255,255,255,.1);
-
-  --text-normal:  #dcddde;
-  --text-muted:   #72767d;
-  --text-header:  #ffffff;
-  --text-link:    #00b0f4;
-
-  --font: 'gg sans','Noto Sans','Helvetica Neue',Helvetica,Arial,sans-serif;
-  --mono: 'Consolas','Andale Mono WT','Andale Mono','Lucida Console',monospace;
-}
-
-*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
-html{ height:100%; }
-
-body{
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text-normal);
-  min-height:100vh;
-  font-size:16px;
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-}
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{ width:8px; height:8px; }
-::-webkit-scrollbar-track{ background:transparent; }
-::-webkit-scrollbar-thumb{ background:var(--primary-530); border-radius:4px; }
-
-/* ═══════════════════════════
-   TOP NAV — discord style
-═══════════════════════════ */
-.topnav{
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  height: 56px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 0 24px;
-  position: sticky;
-  top:0;
-  z-index:100;
-}
-
-.nav-brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  text-decoration:none;
-}
-
-.nav-logo{
-  width:36px; height:36px;
-  background: var(--blurple);
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:18px;
-  font-weight:900;
-  color:#fff;
-  flex-shrink:0;
-}
-
-.nav-title{
-  font-size:1rem;
-  font-weight:700;
-  color: var(--text-header);
-  letter-spacing:-.01em;
-}
-
-.nav-subtitle{
-  font-size:.75rem;
-  color: var(--text-muted);
-  margin-top:1px;
-}
-
-.nav-right{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.nav-link{
-  padding:6px 16px;
-  border-radius:3px;
-  font-size:.875rem;
-  font-weight:500;
-  cursor:pointer;
-  border:none;
-  font-family:var(--font);
-  transition: background .15s;
-  text-decoration:none;
-  display:inline-block;
-}
-.nav-link-ghost{
-  background:transparent;
-  color:var(--text-normal);
-}
-.nav-link-ghost:hover{ background:var(--bg-hover); }
-
-.nav-link-blurple{
-  background: var(--blurple);
-  color:#fff;
-}
-.nav-link-blurple:hover{ background:var(--blurple-dark); }
-
-/* ═══════════════════════════
-   PAGE WRAPPER
-═══════════════════════════ */
-.page-wrap{
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 40px 24px 80px;
-}
-
-/* ═══════════════════════════
-   HERO — discordstatus style
-═══════════════════════════ */
-.hero{
-  margin-bottom:32px;
-}
-
-.hero-status-row{
-  display:flex;
-  align-items:center;
-  gap:16px;
-  padding:20px 24px;
-  border-radius:5px;
-  border:1px solid;
-  margin-bottom:16px;
-}
-.hsr-operational{
-  background:rgba(59,165,92,.12);
-  border-color:rgba(59,165,92,.35);
-}
-.hsr-degraded{
-  background:rgba(250,166,26,.1);
-  border-color:rgba(250,166,26,.3);
-}
-.hsr-outage{
-  background:rgba(237,66,69,.1);
-  border-color:rgba(237,66,69,.3);
-}
-
-.hsr-dot{
-  width:16px; height:16px;
-  border-radius:50%;
-  flex-shrink:0;
-}
-.hsr-operational .hsr-dot{ background:var(--status-green); box-shadow:0 0 10px rgba(67,181,129,.5); animation:glow 2s infinite; }
-.hsr-degraded   .hsr-dot{ background:var(--status-yellow); animation:glow-y 2s infinite; }
-.hsr-outage     .hsr-dot{ background:var(--status-red); animation:glow-r 1.5s infinite; }
-
-.hsr-text{
-  flex:1;
-}
-.hsr-title{
-  font-size:1.125rem;
-  font-weight:700;
-  color:var(--text-header);
-}
-.hsr-sub{
-  font-size:.8125rem;
-  color:var(--text-muted);
-  margin-top:2px;
-}
-
-/* Last updated */
-.last-updated{
-  font-size:.75rem;
-  color:var(--text-muted);
-  text-align:right;
-  margin-bottom:24px;
-}
-
-/* ═══════════════════════════
-   SECTION HEADERS
-═══════════════════════════ */
-.section{
-  margin-bottom:32px;
-}
-
-.section-title{
-  font-size:.75rem;
-  font-weight:700;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--text-muted);
-  padding-bottom:8px;
-  border-bottom:1px solid var(--border2);
-  margin-bottom:0;
-}
-
-/* ═══════════════════════════
-   COMPONENT TABLE — discord style
-═══════════════════════════ */
-.component-group{
-  border:1px solid var(--border2);
-  border-radius:5px;
-  overflow:hidden;
-  margin-top:12px;
-}
-
-.component-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 16px;
-  background:var(--bg-card);
-  border-bottom:1px solid var(--border);
-  transition: background .15s;
-  gap:12px;
-}
-.component-row:last-child{ border-bottom:none; }
-.component-row:hover{ background:var(--bg-hover); }
-
-.cr-left{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  flex:1;
-  min-width:0;
-}
-
-.cr-icon{
-  font-size:1.1rem;
-  width:32px;
-  height:32px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:var(--bg-input);
-  border-radius:50%;
-  flex-shrink:0;
-}
-
-.cr-name{
-  font-size:.9375rem;
-  font-weight:600;
-  color:var(--text-header);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.cr-desc{
-  font-size:.75rem;
-  color:var(--text-muted);
-  margin-top:1px;
-}
-
-.cr-right{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-shrink:0;
-}
-
-/* Uptime bar — discordstatus style */
-.uptime-bar{
-  display:flex;
-  gap:2px;
-  align-items:flex-end;
-}
-.ub-block{
-  width:8px;
-  height:28px;
-  border-radius:2px;
-  background:var(--status-green);
-  opacity:.5;
-  transition: opacity .2s, background .3s;
-  cursor:default;
-}
-.ub-block:hover{ opacity:1; }
-.ub-block.incident{ background:var(--status-red); opacity:.7; }
-.ub-block.degraded{ background:var(--status-yellow); opacity:.7; }
-.ub-block.current.ok { background:var(--status-green); opacity:1; animation:glow .8s infinite; }
-.ub-block.current.warn{ background:var(--status-yellow); opacity:1; }
-.ub-block.current.bad { background:var(--status-red); opacity:1; }
-
-/* Status indicator — discord pill style */
-.status-ind{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  font-size:.75rem;
-  font-weight:700;
-  font-family:var(--mono);
-  padding:3px 10px;
-  border-radius:3px;
-  white-space:nowrap;
-}
-.si-ok   { background:rgba(67,181,129,.15); color:#43b581; }
-.si-warn { background:rgba(250,166,26,.15);  color:#faa61a; }
-.si-bad  { background:rgba(240,71,71,.15);   color:#f04747; }
-
-.si-dot{
-  width:6px; height:6px;
-  border-radius:50%;
-  flex-shrink:0;
-}
-.si-ok  .si-dot{ background:#43b581; animation:blink 2s infinite; }
-.si-warn .si-dot{ background:#faa61a; animation:blink 1.5s infinite; }
-.si-bad  .si-dot{ background:#f04747; }
-
-/* Admin toggle */
-.admin-toggle{
-  display:none;
-  padding:3px 10px;
-  border-radius:3px;
-  border:1px solid var(--border2);
-  background:transparent;
-  color:var(--text-muted);
-  font-size:.75rem;
-  font-family:var(--font);
-  cursor:pointer;
-  transition:all .15s;
-}
-.admin-toggle:hover{ background:var(--bg-hover); color:var(--text-normal); }
-body.admin .admin-toggle{ display:inline-flex; }
-
-/* ═══════════════════════════
-   INCIDENTS — discord style
-═══════════════════════════ */
-.no-incidents{
-  padding:20px 16px;
-  background:var(--bg-card);
-  border:1px solid var(--border2);
-  border-radius:5px;
-  margin-top:12px;
-  font-size:.9375rem;
-  color:var(--text-muted);
-}
-
-/* ═══════════════════════════
-   SUPPORT — discord style
-═══════════════════════════ */
-.support-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-top:12px;
-}
-@media(max-width:580px){ .support-grid{ grid-template-columns:1fr; } }
-
-.sup-card{
-  background:var(--bg-card);
-  border:1px solid var(--border2);
-  border-radius:5px;
-  padding:20px;
-  cursor:pointer;
-  text-decoration:none;
-  color:inherit;
-  display:block;
-  transition:background .15s, border-color .2s;
-}
-.sup-card:hover{
-  background:var(--bg-hover);
-  border-color:var(--blurple);
-}
-.sup-card-icon{ font-size:1.5rem; margin-bottom:10px; }
-.sup-card-title{
-  font-size:.9375rem;
-  font-weight:700;
-  color:var(--text-header);
-  margin-bottom:4px;
-}
-.sup-card-desc{
-  font-size:.8125rem;
-  color:var(--text-muted);
-  line-height:1.5;
-}
-
-/* ═══════════════════════════
-   DISCORD FORM
-═══════════════════════════ */
-.discord-form{
-  background:var(--bg-card);
-  border:1px solid var(--border2);
-  border-radius:5px;
-  padding:20px;
-  margin-top:12px;
-  display:none;
-}
-.discord-form.open{ display:block; }
-
-.form-title{
-  font-size:.875rem;
-  font-weight:700;
-  color:var(--text-header);
-  margin-bottom:16px;
-  padding-bottom:12px;
-  border-bottom:1px solid var(--border);
-}
-
-.field{ margin-bottom:16px; }
-.field-label{
-  display:block;
-  font-size:.75rem;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.04em;
-  color:var(--primary-330);
-  margin-bottom:8px;
-}
-.field-label .req{ color:var(--red); margin-left:3px; }
-
-.field-input, .field-select, .field-textarea{
-  width:100%;
-  padding:10px;
-  background:var(--bg-input);
-  border:1px solid var(--border2);
-  border-radius:3px;
-  color:var(--text-header);
-  font-family:var(--font);
-  font-size:.9375rem;
-  outline:none;
-  transition:border-color .15s, box-shadow .15s;
-}
-.field-input::placeholder,
-.field-textarea::placeholder{ color:var(--text-muted); }
-.field-input:focus,
-.field-select:focus,
-.field-textarea:focus{
-  border-color:var(--blurple);
-  box-shadow:0 0 0 2px rgba(88,101,242,.3);
-}
-.field-select{ cursor:pointer; }
-.field-select option{ background:var(--bg-card); }
-.field-textarea{ resize:vertical; min-height:88px; line-height:1.5; }
-
-.field-hint{
-  font-size:.75rem;
-  color:var(--text-muted);
-  margin-top:6px;
-}
-.field-error{
-  font-size:.75rem;
-  color:var(--red);
-  margin-top:6px;
-  display:none;
-}
-
-.form-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-@media(max-width:500px){ .form-row{ grid-template-columns:1fr; } }
-
-.discord-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  padding:8px 16px;
-  border-radius:3px;
-  font-family:var(--font);
-  font-size:.875rem;
-  font-weight:500;
-  cursor:pointer;
-  border:none;
-  transition:background .15s, opacity .15s;
-  min-width:96px;
-}
-.discord-btn:active{ transform:scale(.98); }
-.btn-blurple{ background:var(--blurple); color:#fff; }
-.btn-blurple:hover{ background:var(--blurple-dark); }
-.btn-blurple:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
-.btn-gray{ background:var(--primary-530); color:var(--text-normal); }
-.btn-gray:hover{ background:var(--primary-500); }
-.btn-red{ background:var(--red); color:#fff; }
-.btn-red:hover{ background:#c03537; }
-
-/* ═══════════════════════════
-   TICKET CREATED
-═══════════════════════════ */
-.ticket-success{
-  display:none;
-  text-align:center;
-  padding:32px 20px;
-}
-.ticket-success-icon{ font-size:3rem; margin-bottom:12px; }
-.ticket-success h3{ font-size:1.125rem; font-weight:700; color:var(--text-header); margin-bottom:6px; }
-.ticket-success p{ font-size:.875rem; color:var(--text-muted); margin-bottom:16px; }
-.ticket-id-box{
-  display:inline-block;
-  background:var(--bg-input);
-  border:1px solid var(--border2);
-  border-radius:3px;
-  padding:8px 20px;
-  font-size:1.125rem;
-  font-weight:700;
-  color:var(--blurple);
-  font-family:var(--mono);
-  letter-spacing:.1em;
-  cursor:copy;
-  margin-bottom:8px;
-}
-.ticket-id-hint{ font-size:.75rem; color:var(--text-muted); margin-bottom:16px; }
-
-/* ═══════════════════════════
-   TICKET CHECKER
-═══════════════════════════ */
-.checker-wrap{
-  background:var(--bg-card);
-  border:1px solid var(--border2);
-  border-radius:5px;
-  padding:20px;
-  margin-top:12px;
-}
-.checker-row{
-  display:flex;
-  gap:8px;
-}
-.checker-row .field-input{ flex:1; }
-
-.ticket-view{
-  margin-top:20px;
-  display:none;
-}
-
-.ticket-view-header{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  margin-bottom:12px;
-  flex-wrap:wrap;
-  gap:8px;
-  padding-bottom:12px;
-  border-bottom:1px solid var(--border);
-}
-.tvh-name{
-  font-size:1rem;
-  font-weight:700;
-  color:var(--text-header);
-}
-.tvh-meta{
-  font-size:.8125rem;
-  color:var(--text-muted);
-  margin-top:2px;
-}
-
-.status-tag{
-  padding:3px 10px;
-  border-radius:3px;
-  font-size:.6875rem;
-  font-weight:700;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  border:1px solid;
-}
-.tag-open    { background:rgba(88,101,242,.15); color:#848fec; border-color:rgba(88,101,242,.3); }
-.tag-answered{ background:rgba(67,181,129,.12); color:#43b581; border-color:rgba(67,181,129,.3); }
-.tag-closed  { background:rgba(116,127,141,.15); color:#747f8d; border-color:rgba(116,127,141,.3); }
-
-/* ═══════════════════════════
-   CHAT — discord messages
-═══════════════════════════ */
-.chat-log{
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  max-height:360px;
-  overflow-y:auto;
-  padding:8px 0;
-  background:var(--bg-input);
-  border:1px solid var(--border);
-  border-radius:3px;
-  margin-bottom:10px;
-}
-
-.msg{
-  display:flex;
-  gap:16px;
-  padding:4px 16px;
-  transition:background .05s;
-  position:relative;
-}
-.msg:hover{ background:rgba(4,4,5,.07); }
-.msg+.msg{ margin-top:0; }
-
-/* Avatar */
-.msg-av{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  font-weight:800;
-  color:#fff;
-  margin-top:2px;
-}
-.av-user { background:linear-gradient(135deg,var(--blurple),#7289da); }
-.av-admin{ background:linear-gradient(135deg,var(--red),#b83234); }
-
-.msg-body{ flex:1; min-width:0; padding-top:2px; }
-
-.msg-header{
-  display:flex;
-  align-items:baseline;
-  gap:8px;
-  margin-bottom:4px;
-}
-.msg-name{
-  font-size:.9375rem;
-  font-weight:700;
-  line-height:1.375rem;
-}
-.msg-name.user-name { color:var(--blurple); }
-.msg-name.admin-name{ color:var(--red); }
-
-.msg-badge{
-  display:inline-block;
-  background:var(--red);
-  color:#fff;
-  font-size:.5rem;
-  font-weight:700;
-  padding:1px 4px;
-  border-radius:3px;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  vertical-align:middle;
-  margin-left:2px;
-}
-
-.msg-timestamp{
-  font-size:.75rem;
-  color:var(--text-muted);
-  font-weight:400;
-}
-.msg-content{
-  font-size:.9375rem;
-  color:var(--text-normal);
-  line-height:1.375rem;
-  word-break:break-word;
-  white-space:pre-wrap;
-}
-
-/* Input bar — discord style */
-.msg-input-bar{
-  display:flex;
-  gap:0;
-  background:var(--bg-input);
-  border:1px solid var(--border2);
-  border-radius:8px;
-  overflow:hidden;
-  align-items:center;
-  padding-right:8px;
-  transition:border-color .15s;
-}
-.msg-input-bar:focus-within{
-  border-color:var(--blurple);
-}
-.msg-input-bar input{
-  flex:1;
-  background:transparent;
-  border:none;
-  padding:11px 16px;
-  color:var(--text-header);
-  font-family:var(--font);
-  font-size:.9375rem;
-  outline:none;
-}
-.msg-input-bar input::placeholder{ color:var(--text-muted); }
-.msg-send-btn{
-  background:transparent;
-  border:none;
-  color:var(--text-muted);
-  cursor:pointer;
-  padding:6px;
-  border-radius:4px;
-  font-size:1.1rem;
-  transition:color .15s, background .15s;
-}
-.msg-send-btn:hover{ color:var(--text-normal); background:var(--bg-hover); }
-
-/* ═══════════════════════════
-   ADMIN TICKETS PAGE
-═══════════════════════════ */
-.admin-section{
-  display:none;
-  margin-bottom:32px;
-}
-body.admin .admin-section{ display:block; }
-
-.filter-bar{
-  display:flex;
-  gap:4px;
-  margin-bottom:12px;
-  flex-wrap:wrap;
-}
-.filter-pill{
-  padding:4px 12px;
-  border-radius:999px;
-  font-size:.8125rem;
-  font-weight:600;
-  cursor:pointer;
-  border:1px solid var(--border2);
-  background:transparent;
-  color:var(--text-muted);
-  font-family:var(--font);
-  transition:all .15s;
-}
-.filter-pill.on{ background:var(--blurple); color:#fff; border-color:var(--blurple); }
-.filter-pill:hover:not(.on){ background:var(--bg-hover); color:var(--text-normal); }
-
-.ticket-list{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.ticket-row{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 16px;
-  background:var(--bg-card);
-  border:1px solid var(--border2);
-  border-radius:5px;
-  cursor:pointer;
-  transition:background .15s, border-color .15s;
-}
-.ticket-row:hover{ background:var(--bg-hover); }
-.ticket-row.sel{ border-color:var(--blurple); background:rgba(88,101,242,.07); }
-
-.tr-av{
-  width:36px; height:36px;
-  border-radius:50%;
-  background:linear-gradient(135deg,var(--blurple),#7289da);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:14px;
-  font-weight:800;
-  color:#fff;
-  flex-shrink:0;
-}
-.tr-info{ flex:1; min-width:0; }
-.tr-name{
-  font-size:.875rem;
-  font-weight:700;
-  color:var(--text-header);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.tr-preview{
-  font-size:.8125rem;
-  color:var(--text-muted);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.tr-meta{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:4px;
-  flex-shrink:0;
-}
-.tr-time{
-  font-size:.6875rem;
-  color:var(--text-muted);
-  font-family:var(--mono);
-}
-
-/* Detail panel */
-.ticket-detail{
-  margin-top:12px;
-  background:var(--bg-card);
-  border:1px solid var(--blurple);
-  border-radius:5px;
-  padding:20px;
-  display:none;
-  box-shadow:0 0 0 1px rgba(88,101,242,.1), 0 4px 24px rgba(0,0,0,.4);
-}
-.td-header{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  margin-bottom:16px;
-  flex-wrap:wrap;
-  gap:8px;
-  padding-bottom:12px;
-  border-bottom:1px solid var(--border);
-}
-.td-name{ font-size:1rem; font-weight:700; color:var(--text-header); }
-.td-meta{ font-size:.8125rem; color:var(--text-muted); margin-top:2px; }
-.td-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-
-.no-data{
-  text-align:center;
-  padding:32px 20px;
-  color:var(--text-muted);
-  font-size:.9375rem;
-}
-
-/* ═══════════════════════════
-   ROLES — discord role list
-═══════════════════════════ */
-.roles-list{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  margin-top:12px;
-}
-.role-item{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:8px 12px;
-  background:var(--bg-card);
-  border:1px solid var(--border2);
-  border-radius:5px;
-  transition:background .15s;
-}
-.role-item:hover{ background:var(--bg-hover); }
-.role-circle{
-  width:14px; height:14px;
-  border-radius:50%;
-  flex-shrink:0;
-}
-.role-name{
-  font-size:.875rem;
-  font-weight:600;
-  color:var(--text-header);
-}
-.role-members{
-  margin-left:auto;
-  font-size:.75rem;
-  color:var(--text-muted);
-}
-
-/* ═══════════════════════════
-   MODAL — discord style
-═══════════════════════════ */
-.modal-bg{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  z-index:500;
-  align-items:center;
-  justify-content:center;
-}
-.modal-bg.show{ display:flex; }
-
-.modal{
-  background:var(--bg-card);
-  border-radius:5px;
-  width:440px;
-  max-width:calc(100vw - 32px);
-  animation:pop .2s ease;
-  box-shadow:0 8px 16px rgba(0,0,0,.24);
-}
-
-.modal-header{
-  padding:16px 20px;
-  border-bottom:1px solid var(--border);
-}
-.modal-title{
-  font-size:1.25rem;
-  font-weight:700;
-  color:var(--text-header);
-  margin-bottom:4px;
-}
-.modal-desc{ font-size:.875rem; color:var(--text-muted); }
-
-.modal-body{ padding:20px; }
-.modal-error{
-  font-size:.8125rem;
-  color:var(--red);
-  margin-top:8px;
-  display:none;
-}
-
-.modal-footer{
-  padding:16px 20px;
-  background:var(--bg-input);
-  border-radius:0 0 5px 5px;
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-}
-
-/* ═══════════════════════════
-   ADMIN BOTTOM BAR
-═══════════════════════════ */
-.admin-bar{
-  display:none;
-  position:fixed;
-  bottom:16px;
-  right:16px;
-  z-index:200;
-}
-body.admin .admin-bar{ display:block; }
-
-.admin-bar-inner{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:8px 16px;
-  background:var(--bg-card);
-  border:1px solid rgba(88,101,242,.4);
-  border-radius:5px;
-  box-shadow:0 4px 16px rgba(0,0,0,.5);
-}
-.admin-bar-label{
-  font-size:.8125rem;
-  font-weight:700;
-  color:var(--blurple);
-}
-
-/* ═══════════════════════════
-   FOOTER — discord style
-═══════════════════════════ */
-footer{
-  background:var(--bg-card);
-  border-top:1px solid var(--border);
-  padding:20px 24px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:12px;
-  font-size:.8125rem;
-  color:var(--text-muted);
-}
-.footer-brand{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.footer-logo{
-  width:24px; height:24px;
-  background:var(--blurple);
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  color:#fff;
-  font-weight:900;
-}
-footer a{
-  color:var(--text-link);
-  text-decoration:none;
-}
-footer a:hover{ text-decoration:underline; }
-
-/* ═══════════════════════════
-   PAGE TABS (mobile nav)
-═══════════════════════════ */
-.page-tabs{
-  display:flex;
-  gap:0;
-  border-bottom:1px solid var(--border2);
-  margin-bottom:24px;
-  overflow-x:auto;
-}
-.page-tab{
-  padding:12px 16px;
-  font-size:.875rem;
-  font-weight:500;
-  color:var(--text-muted);
-  cursor:pointer;
-  border-bottom:2px solid transparent;
-  white-space:nowrap;
-  transition:color .15s, border-color .15s;
-  background:none;
-  border-top:none;
-  border-left:none;
-  border-right:none;
-  font-family:var(--font);
-}
-.page-tab:hover{ color:var(--text-normal); }
-.page-tab.active{ color:var(--text-header); border-bottom-color:var(--blurple); }
-
-.tab-page{ display:none; }
-.tab-page.active{ display:block; }
-
-/* ═══════════════════════════
-   ANIMATIONS
-═══════════════════════════ */
-@keyframes glow   { 0%,100%{box-shadow:0 0 6px rgba(67,181,129,.4)}50%{box-shadow:0 0 14px rgba(67,181,129,.7)} }
-@keyframes glow-y { 0%,100%{box-shadow:0 0 6px rgba(250,166,26,.4)}50%{box-shadow:0 0 14px rgba(250,166,26,.7)} }
-@keyframes glow-r { 0%,100%{box-shadow:0 0 6px rgba(240,71,71,.4)}50%{box-shadow:0 0 14px rgba(240,71,71,.7)} }
-@keyframes blink  { 0%,100%{opacity:1}50%{opacity:.35} }
-@keyframes pop    { from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)} }
-@keyframes fadeUp { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
-
-.fade-in{ animation:fadeUp .25s ease both; }
-
-/* responsive */
-@media(max-width:600px){
-  .page-wrap{ padding:24px 16px 60px; }
-  .topnav{ padding:0 16px; }
-  .nav-subtitle{ display:none; }
-}
+  --b1:#e3f0f1;--b2:#8fbfc4;--b3:#c9b48f;
+  --teal:#134b5c;--teal2:#3d7482;--paper:#e6ecee;--ink:#12303a;--gold:#e0b34a;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--b1:#1c3a41;--b2:#122b33;--b3:#2b2a26}}
+:root[data-theme="dark"]{--b1:#1c3a41;--b2:#122b33;--b3:#2b2a26}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;font-family:Nunito,system-ui,sans-serif;color:#fff;background:#8fbfc4;background:linear-gradient(160deg,var(--b1),var(--b2) 55%,var(--b3))}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+.stage{height:280vh;--p:0}
+.pin{position:sticky;top:env(safe-area-inset-top,0px);height:calc(100svh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));padding:14px}
+.card{position:relative;height:100%;border-radius:24px;overflow:hidden;background:var(--teal);box-shadow:0 30px 60px -20px rgba(0,20,30,.55)}
+.scene{position:absolute;inset:0;width:100%;height:100%;transform-origin:50% 70%;transform:scale(calc(1 + var(--p)*.14)) translateY(calc(var(--p)*-6%))}
+.tint{position:absolute;inset:0;background:var(--teal);opacity:calc(var(--p)*1.7 - .25)}
+
+.ui{position:absolute;inset:0;opacity:calc(1 - var(--p)*4)}
+nav{position:absolute;top:22px;left:28px;right:28px;display:flex;align-items:center;justify-content:space-between;font-size:.8rem;font-weight:600}
+nav .l{display:flex;gap:26px;align-items:center;flex:1}
+nav .r{flex:1;display:flex;justify-content:flex-end}
+.logo{width:30px;height:30px;border-radius:50%;background:#fff;color:var(--teal);display:grid;place-items:center;font-weight:800}
+.burger{width:18px;height:12px;border-block:2px solid #fff;position:relative}
+.burger::after{content:"";position:absolute;left:0;right:0;top:3px;height:2px;background:#fff}
+.bottom{position:absolute;left:28px;right:28px;bottom:26px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.bottom p{margin:0;flex:1;max-width:260px;font-size:.62rem;line-height:1.5;opacity:.85}
+.cta{border:1px solid #fff;padding:12px 38px;font-size:.72rem;letter-spacing:.14em;font-weight:600;transition:background .25s,color .25s}
+.cta:hover{background:#fff;color:var(--teal)}
+.soc{flex:1;display:flex;justify-content:flex-end;gap:14px}
+.soc svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:1.6}
+
+.title{position:absolute;left:0;right:0;top:36%;text-align:center;transform:translateY(calc(var(--p)*-55vh));opacity:calc(1 - var(--p)*2.2);pointer-events:none}
+h1{margin:0;font-weight:800;font-size:clamp(3rem,15vw,10.5rem);line-height:1;letter-spacing:-.01em;text-shadow:0 6px 40px rgba(0,30,40,.25);animation:intro 1.6s cubic-bezier(.2,.7,.1,1) both}
+@keyframes intro{from{opacity:0;letter-spacing:.35em;filter:blur(10px)}to{opacity:1;letter-spacing:-.01em;filter:blur(0)}}
+
+.reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:0 6%;transform:translateY(calc((1 - var(--p))*55vh));opacity:calc((var(--p) - .3)*3)}
+.cards{width:min(980px,100%);display:grid;grid-template-columns:1fr 1fr 1fr;height:clamp(150px,26vh,230px)}
+.c{padding:22px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.c h2{margin:0;font-size:1.05rem;line-height:1.25}
+.c p{margin:0;font-size:.68rem;line-height:1.55;opacity:.85}
+.c a{margin-top:auto;font-size:.62rem;font-weight:600;color:var(--gold)}
+.c.a{background:var(--paper);color:var(--ink)}
+.c.a a{color:#8a6a1a}
+.c.b{background:var(--teal2)}
+.c.m{padding:0}
+.c.m svg{width:100%;height:100%;display:block}
+.more{max-width:640px;text-align:center;font-size:.68rem;line-height:1.7;opacity:.85}
+.more p{margin:0 0 10px}
+.more a{color:var(--gold);font-weight:600}
+
+@media (max-width:700px){
+  nav{left:18px;right:18px}nav .l a{display:none}
+  .bottom{left:18px;right:18px;bottom:20px;flex-wrap:wrap;justify-content:center}
+  .bottom p{order:3;flex-basis:100%;max-width:none;text-align:center}.soc{display:none}
+  .cards{grid-template-columns:1fr;height:auto}.c.m{display:none}
+  .reveal{gap:22px}
+}
+@media (prefers-reduced-motion:reduce){h1{animation:none}}
+
+button{font:inherit;color:inherit;cursor:pointer}
+button.cta{background:none}button.c{border:0;text-align:left}
+.c span{margin-top:auto;font-size:.62rem;font-weight:600;color:var(--gold)}.c.a span{color:#8a6a1a}.c.d{background:#0e3644}
+.reveal{pointer-events:none}.stage.on .reveal{pointer-events:auto}.ui{pointer-events:auto}.stage.on .ui{pointer-events:none}
+.site{margin:0 14px 14px;border-radius:24px;background:var(--teal);padding:clamp(48px,9vw,110px) 6%;display:grid;gap:clamp(64px,10vw,120px)}
+.site>section{width:min(980px,100%);margin:0 auto}
+.site h2{font-size:clamp(1.6rem,4.5vw,2.6rem);font-weight:800;margin:0 0 14px;line-height:1.1}
+.site p,.site li{line-height:1.7;font-size:.92rem}.site p{opacity:.9;max-width:62ch;margin:0 0 14px}
+.grid{display:grid;gap:14px;margin-top:24px}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr 1fr}
+.box{background:var(--teal2);padding:22px;border:0;text-align:left;border-radius:14px}
+.box b{display:block;font-size:2.3rem;font-weight:800}
+.tl{list-style:none;margin:28px 0 0;padding:0 0 0 22px;border-left:2px solid var(--teal2)}.tl li{margin-bottom:14px}.tl b{color:var(--gold)}
+.m small{display:block;opacity:.75;font-size:.72rem;margin-bottom:4px}.m b{font-size:1.05rem;font-weight:600}
+.m:hover{background:#4a8494}
+details{border-bottom:1px solid var(--teal2);padding:14px 0}summary{cursor:pointer;font-weight:600}details p{margin:10px 0 0}
+.rev{border:1px dashed var(--teal2);padding:20px;font-size:.85rem;opacity:.85;border-radius:14px}
+.btn{display:inline-block;border:1px solid #fff;padding:12px 28px;font-size:.75rem;letter-spacing:.1em;font-weight:600;background:none;margin:6px 8px 0 0;color:#fff}
+.btn.g{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+dialog{border:0;border-radius:20px;background:var(--paper);color:var(--ink);padding:28px;width:min(520px,92vw);max-height:86vh;font-family:inherit}
+dialog::backdrop{background:rgba(5,25,32,.72)}
+dialog h2{margin:0 0 12px;font-size:1.5rem}dialog p,dialog li{font-size:.9rem;line-height:1.65}
+dialog .btn{color:var(--ink);border-color:var(--ink)}dialog .btn.g{color:var(--ink);border-color:var(--gold)}
+.x{float:right;background:none;border:0;font-size:1.3rem;color:var(--ink)}
+#inv{width:100%;padding:10px;border:1px solid #9bb;border-radius:8px;font:inherit;margin:6px 0}
+@media (max-width:700px){.g3,.g2{grid-template-columns:1fr}.more{display:none}dialog{margin:auto 0 0;width:100vw;max-width:none;border-radius:20px 20px 0 0}}
+
+html{scroll-behavior:auto}@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+nav,.cta,.c,.box,.btn,details,.rev,.x,.fab,dialog,.mn a{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.card{border-radius:32px}
+.tint{background:radial-gradient(60% 50% at 18% 28%,rgba(70,170,190,.55),transparent 70%),radial-gradient(50% 45% at 88% 78%,rgba(224,179,74,.3),transparent 70%),var(--teal)}
+.site{border-radius:32px;background:radial-gradient(45vw 45vw at 92% 8%,rgba(224,179,74,.28),transparent),radial-gradient(50vw 50vw at 4% 42%,rgba(70,170,190,.38),transparent),radial-gradient(45vw 45vw at 96% 78%,rgba(70,170,190,.3),transparent),var(--teal)}
+nav{top:16px;left:16px;right:16px;padding:9px 22px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3)}
+.burger{background:none;border-inline:0;padding:0;cursor:pointer;width:22px;height:14px;flex:none;outline-offset:8px}.burger::after{top:4px}
+.fab{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:20;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);opacity:0;pointer-events:none;transition:opacity .3s}
+body.scrolled .fab{opacity:1;pointer-events:auto}
+.mn{display:grid;gap:8px;margin-top:8px}.mn a{padding:13px 20px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);font-weight:600}
+.mn a:hover{background:rgba(255,255,255,.22)}.mn a.g{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.cta{border-radius:999px;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.5);padding:13px 34px;font-size:.9rem;font-weight:600;letter-spacing:.02em}
+.bottom p{font-size:.74rem}
+.cards{gap:14px;height:clamp(180px,30vh,250px)}
+.c,.c.a,.c.b,.c.d{border-radius:26px;padding:24px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.13);color:#fff;box-shadow:0 10px 30px rgba(0,20,30,.25)}
+.c h2{font-size:1.2rem}.c p{font-size:.85rem}.c span,.c.a span{font-size:.8rem;color:var(--gold)}
+.site p,.site li{font-size:1rem}.box h2{font-size:1.5rem}
+.box{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:26px;padding:24px}
+.m{border-radius:32px;padding:16px 24px}.m:hover{background:rgba(255,255,255,.2)}
+details{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:14px 22px;margin-bottom:10px}
+.rev{border:1px solid rgba(255,255,255,.2);border-radius:26px;background:rgba(255,255,255,.07);padding:22px}
+.btn{border-radius:999px;padding:13px 30px;font-size:.9rem;letter-spacing:.02em;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4)}
+.btn.g{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+dialog{background:rgba(16,62,78,.68);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:30px;box-shadow:0 30px 80px rgba(0,15,25,.5);padding:30px}
+dialog::backdrop{background:rgba(5,25,32,.5);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+dialog p,dialog li{font-size:.95rem}dialog .btn{color:#fff;border-color:rgba(255,255,255,.45)}dialog .btn.g{color:var(--ink);border-color:var(--gold)}
+.x{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;line-height:1;padding:0}
+#inv{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:12px 18px}
+@media (max-width:700px){dialog{width:100vw;max-width:none;border-radius:30px 30px 0 0}nav{left:12px;right:12px}.cards{height:auto}}
+
+.eyebrow{display:inline-block;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font-size:.75rem;font-weight:600;letter-spacing:.04em;color:var(--gold);margin-bottom:14px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.rules{display:grid;gap:10px;padding:0;list-style:none;counter-reset:r;margin:22px 0 18px}
+.rules li{counter-increment:r;position:relative;padding:14px 20px 14px 60px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16)}
+.rules li::before{content:counter(r);position:absolute;left:16px;top:50%;translate:0 -50%;width:30px;height:30px;border-radius:50%;background:var(--gold);color:var(--ink);font-weight:800;font-size:.85rem;display:grid;place-items:center}
+dialog .rules li::before,dialog ol{color:inherit}
+.stars{color:var(--gold);font-size:1.5rem;letter-spacing:.14em}
+.rev{margin:0;opacity:1;display:grid;gap:12px}.rev small{display:block;opacity:.75;margin-top:2px}
+.avg{margin-top:22px}.avg b{color:var(--gold)}
+.box,.c,.rev{position:relative;overflow:hidden}
+.box::before,.c::before,.rev::before{content:"";position:absolute;inset:0;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.17),transparent 70%);opacity:0;transition:opacity .3s;pointer-events:none}
+.box:hover::before,.c:hover::before,.rev:hover::before{opacity:1}
+.rv-in{opacity:0;translate:0 26px;transition:opacity .8s,translate .8s cubic-bezier(.2,.7,.1,1)}.rv-in.in{opacity:1;translate:0 0}
+@media (prefers-reduced-motion:reduce){.rv-in{opacity:1;translate:none;transition:none}}
+footer{text-align:center}.foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
+.foot a{font-size:.85rem;padding:9px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08)}.foot a:hover{background:rgba(255,255,255,.2)}
+a.box{display:block}.lk small{opacity:.75;font-size:.75rem}.lk strong{display:block;font-size:1.1rem;margin:4px 0 10px}.lk span{color:var(--gold);font-size:.85rem}.lk:hover{background:rgba(255,255,255,.2)}
+h3.sub{margin:30px 0 0;font-size:1.05rem;color:var(--gold)}
+.botid{margin:12px 0 8px!important}.botid code{background:rgba(255,255,255,.14);padding:3px 10px;border-radius:10px;font-size:.85rem;word-break:break-all;user-select:all}.box a.lnk{color:var(--gold);font-weight:600;font-size:.9rem}
+.m .since{display:block;font-size:.75rem;opacity:.7;margin-top:6px}
+.av{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;font-weight:800;background:linear-gradient(135deg,var(--gold),#f3d98c);color:var(--ink);margin-bottom:14px}.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.facts div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:12px 16px}.facts small{display:block;opacity:.75;font-size:.75rem;margin-bottom:2px}.facts b{font-size:.95rem}
+dialog h3{font-size:1rem;margin:18px 0 6px;color:var(--gold)}dialog ul{margin:0 0 8px;padding-left:1.2em}dialog small{opacity:.8}
 </style>
 </head>
 <body>
+<main class="stage" id="stage">
+  <div class="pin">
+    <div class="card">
+      <svg class="scene" id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d9cf"/><stop offset=".55" stop-color="#9fc0d8"/><stop offset="1" stop-color="#5f8fb4"/></linearGradient>
+          <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b7a8c"/><stop offset="1" stop-color="#0d4a63"/></linearGradient>
+          <clipPath id="water"><rect x="0" y="560" width="1600" height="340"/></clipPath>
+          <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+          <g id="land">
+            <rect width="1600" height="560" fill="url(#sky)"/>
+            <path d="M0 400 L130 340 L260 370 L430 250 L560 300 L700 160 L760 205 L830 150 L960 260 L1120 290 L1260 240 L1420 330 L1600 300 V560 H0Z" fill="#4a6f93"/>
+            <path d="M700 160 L760 205 L830 150 L900 215 L820 230 L760 240Z" fill="#7d9bb8" opacity=".7"/>
+            <g id="trees"></g>
+          </g>
+        </defs>
+        <use href="#land"/>
+        <rect y="560" width="1600" height="340" fill="url(#lake)"/>
+        <g clip-path="url(#water)" opacity=".6" filter="url(#soft)"><use href="#land" transform="translate(0,1120) scale(1,-1)"/></g>
+        <rect y="560" width="1600" height="340" fill="url(#lake)" opacity=".35"/>
+      </svg>
+      <div class="tint"></div>
 
-<!-- ══════ TOPNAV ══════ -->
-<nav class="topnav">
-  <a class="nav-brand" href="#">
-    <div class="nav-logo">⚡</div>
-    <div>
-      <div class="nav-title">Hexera Status</div>
-      <div class="nav-subtitle">hexera.discord.gg</div>
-    </div>
-  </a>
-  <div class="nav-right">
-    <button class="nav-link nav-link-ghost" onclick="openAdmin()">Admin</button>
-    <a class="nav-link nav-link-blurple" href="https://discord.gg/hHkWU8GKAA" target="_blank">Pripojiť sa k Discordu</a>
-  </div>
-</nav>
-
-<!-- ══════ MAIN ══════ -->
-<div class="page-wrap">
-
-  <!-- Page tabs -->
-  <div class="page-tabs">
-    <button class="page-tab active" onclick="switchTab('status',this)">Stav systémov</button>
-    <button class="page-tab" onclick="switchTab('support',this)">Podpora</button>
-    <button class="page-tab" onclick="switchTab('roles',this)">Roly</button>
-    <button class="page-tab admin-tab" onclick="switchTab('admin',this)" style="display:none">📋 Tickety</button>
-  </div>
-
-  <!-- ══ TAB: STATUS ══ -->
-  <div class="tab-page active fade-in" id="tab-status">
-
-    <!-- Overall banner -->
-    <div class="hero">
-      <div id="heroBanner" class="hero-status-row hsr-operational">
-        <div class="hsr-dot"></div>
-        <div class="hsr-text">
-          <div class="hsr-title" id="heroTitle">Všetky systémy sú funkčné</div>
-          <div class="hsr-sub" id="heroSub">Žiadne aktuálne problémy</div>
-        </div>
-      </div>
-      <div class="last-updated" id="lastUpdated">Posledná aktualizácia: —</div>
-    </div>
-
-    <!-- Components -->
-    <div class="section">
-      <div class="section-title">Komponenty systému</div>
-      <div class="component-group">
-
-        <div class="component-row">
-          <div class="cr-left">
-            <div class="cr-icon">🤖</div>
-            <div>
-              <div class="cr-name">Hexera Bot</div>
-              <div class="cr-desc">Hlavný Discord bot</div>
-            </div>
-          </div>
-          <div class="cr-right">
-            <div class="uptime-bar" id="ub-bot"></div>
-            <div class="status-ind si-ok" id="si-bot"><span class="si-dot"></span>Funkčný</div>
-            <button class="admin-toggle" onclick="cycle('bot')">Zmeniť</button>
-          </div>
-        </div>
-
-        <div class="component-row">
-          <div class="cr-left">
-            <div class="cr-icon">🌐</div>
-            <div>
-              <div class="cr-name">Web & API</div>
-              <div class="cr-desc">Webová stránka a REST API</div>
-            </div>
-          </div>
-          <div class="cr-right">
-            <div class="uptime-bar" id="ub-web"></div>
-            <div class="status-ind si-ok" id="si-web"><span class="si-dot"></span>Funkčný</div>
-            <button class="admin-toggle" onclick="cycle('web')">Zmeniť</button>
-          </div>
-        </div>
-
-        <div class="component-row">
-          <div class="cr-left">
-            <div class="cr-icon">🗄️</div>
-            <div>
-              <div class="cr-name">Databáza</div>
-              <div class="cr-desc">Hlavná databáza servera</div>
-            </div>
-          </div>
-          <div class="cr-right">
-            <div class="uptime-bar" id="ub-db"></div>
-            <div class="status-ind si-ok" id="si-db"><span class="si-dot"></span>Funkčný</div>
-            <button class="admin-toggle" onclick="cycle('db')">Zmeniť</button>
-          </div>
-        </div>
-
-        <div class="component-row">
-          <div class="cr-left">
-            <div class="cr-icon">🔌</div>
-            <div>
-              <div class="cr-name">Interné API</div>
-              <div class="cr-desc">Interná komunikácia systémov</div>
-            </div>
-          </div>
-          <div class="cr-right">
-            <div class="uptime-bar" id="ub-api"></div>
-            <div class="status-ind si-ok" id="si-api"><span class="si-dot"></span>Funkčný</div>
-            <button class="admin-toggle" onclick="cycle('api')">Zmeniť</button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Active incidents -->
-    <div class="section">
-      <div class="section-title">Aktívne incidenty</div>
-      <div class="no-incidents" id="incidentsBox">
-        Žiadne aktívne incidenty. 🎉
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══ TAB: SUPPORT ══ -->
-  <div class="tab-page fade-in" id="tab-support">
-
-    <div class="section">
-      <div class="section-title">Kontaktovať podporu</div>
-      <div class="support-grid">
-        <a class="sup-card" href="https://discord.gg/hHkWU8GKAA" target="_blank">
-          <div class="sup-card-icon">💬</div>
-          <div class="sup-card-title">Discord ticket</div>
-          <div class="sup-card-desc">Otvor support ticket priamo na Hexera Discord serveri. Najrýchlejší spôsob pomoci.</div>
-        </a>
-        <div class="sup-card" onclick="toggleForm()">
-          <div class="sup-card-icon">📝</div>
-          <div class="sup-card-title">Web formulár</div>
-          <div class="sup-card-desc">Vytvor ticket tu. Dostaneš unikátne ID a môžeš sledovať odpovede admina.</div>
+      <div class="ui">
+        <nav>
+          <div class="l"><button class="burger" data-open="m-menu" aria-label="Menu"></button><a href="#o-nas">O nás</a><a href="#tim">Tím</a></div>
+          <span class="logo">m</span>
+          <div class="r"><a href="https://discord.gg/pzr5dYKvHZ" target="_blank" rel="noopener">Discord</a></div>
+        </nav>
+        <div class="bottom">
+          <p>Discord komunita od roku 2024. Viac ako 500 členov a stále rastieme.</p>
+          <button class="cta" data-open="m-join">Pripojiť sa</button>
+          <div class="soc"><a href="https://discord.gg/pzr5dYKvHZ" target="_blank" rel="noopener" aria-label="Discord"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="13" rx="5"/><circle cx="9" cy="11.5" r="1.3"/><circle cx="15" cy="11.5" r="1.3"/></svg></a></div>
         </div>
       </div>
 
-      <!-- Form -->
-      <div class="discord-form" id="ticketForm">
-        <div class="form-title">📝 Nový support ticket</div>
-        <div id="formFields">
-          <div class="form-row">
-            <div class="field">
-              <label class="field-label">Discord meno <span class="req">*</span></label>
-              <input type="text" class="field-input" id="f-name" placeholder="tvoj_nick" maxlength="50" autocomplete="off"/>
-              <div class="field-hint">Bez # a čísla za menom</div>
-            </div>
-            <div class="field">
-              <label class="field-label">Kategória <span class="req">*</span></label>
-              <select class="field-select" id="f-cat">
-                <option value="">— Vyber kategóriu —</option>
-                <option>🤖 Problém s botom</option>
-                <option>🔨 Odvolanie banu</option>
-                <option>🚨 Nahlásenie hráča</option>
-                <option>💬 Všeobecná otázka</option>
-                <option>📌 Iné</option>
-              </select>
-            </div>
-          </div>
-          <div class="field">
-            <label class="field-label">Popis problému <span class="req">*</span></label>
-            <textarea class="field-textarea" id="f-msg" placeholder="Opíš problém čo najpresnejšie. Čím viac detailov, tým rýchlejšia pomoc." maxlength="1000"></textarea>
-            <div class="field-hint">Min. 20 znakov</div>
-            <div class="field-error" id="f-err"></div>
-          </div>
-          <button class="discord-btn btn-blurple" id="submitBtn" onclick="submitTicket()">📨 Odoslať ticket</button>
-        </div>
-        <!-- Success -->
-        <div class="ticket-success" id="ticketSuccess">
-          <div class="ticket-success-icon">🎉</div>
-          <h3>Ticket odoslaný!</h3>
-          <p>Ulož si toto ID. Budeš ho potrebovať na sledovanie odpovede:</p>
-          <div class="ticket-id-box" id="ticketIdOut" onclick="copyId()"></div>
-          <div class="ticket-id-hint">Klikni na ID pre skopírovanie do schránky</div>
-          <button class="discord-btn btn-gray" onclick="goChecker()">🔍 Skontrolovať stav →</button>
-        </div>
-      </div>
-    </div>
+      <div class="title"><h1>KEKSLAND</h1></div>
 
-    <!-- Checker -->
-    <div class="section">
-      <div class="section-title">Skontrolovať môj ticket</div>
-      <div class="checker-wrap">
-        <div class="checker-row">
-          <input type="text" class="field-input" id="checkInput"
-            placeholder="HEX-XXXXXX"
-            maxlength="10"
-            oninput="this.value=this.value.toUpperCase()"
-            onkeydown="if(event.key==='Enter')lookupTicket()"/>
-          <button class="discord-btn btn-blurple" onclick="lookupTicket()">Hľadať</button>
+      <div class="reveal" id="more">
+        <div class="cards">
+          <button class="c a" data-open="m-rules"><h2>Pravidlá</h2><p>Čo platí na serveri, aby sa tu cítil dobre každý.</p><span>Otvoriť</span></button>
+          <button class="c b" data-open="m-faq"><h2>Časté otázky</h2><p>Odpovede na to, čo sa nás pýtate najčastejšie.</p><span>Otvoriť</span></button>
+          <button class="c d" data-open="m-support"><h2>Support</h2><p>Potrebuješ pomoc? Napíš nášmu tímu.</p><span>Otvoriť</span></button>
         </div>
-        <div class="field-error" id="checkErr" style="margin-top:8px"></div>
-
-        <div class="ticket-view" id="ticketView">
-          <div class="ticket-view-header">
-            <div>
-              <div class="tvh-name" id="tv-name"></div>
-              <div class="tvh-meta" id="tv-meta"></div>
-            </div>
-            <span class="status-tag" id="tv-tag"></span>
-          </div>
-          <div class="chat-log" id="userLog"></div>
-          <div class="msg-input-bar" id="userInputBar">
-            <input type="text" id="userMsgInput" placeholder="Doplniť informácie k ticketu..." maxlength="500"
-              onkeydown="if(event.key==='Enter')sendUser()"/>
-            <button class="msg-send-btn" onclick="sendUser()" title="Odoslať">➤</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══ TAB: ROLES ══ -->
-  <div class="tab-page fade-in" id="tab-roles">
-    <div class="section">
-      <div class="section-title">Serverové roly</div>
-      <div class="roles-list">
-        <div class="role-item"><div class="role-circle" style="background:#f23f42"></div><div class="role-name">Admin</div><div class="role-members">Správca servera</div></div>
-        <div class="role-item"><div class="role-circle" style="background:#f0b232"></div><div class="role-name">Moderátor</div><div class="role-members">Moderuje server</div></div>
-        <div class="role-item"><div class="role-circle" style="background:#5865f2"></div><div class="role-name">Support</div><div class="role-members">Pomáha členom</div></div>
-        <div class="role-item"><div class="role-circle" style="background:#7289da"></div><div class="role-name">Developer</div><div class="role-members">Vývojár systémov</div></div>
-        <div class="role-item"><div class="role-circle" style="background:#eb459e"></div><div class="role-name">VIP</div><div class="role-members">Špeciálny člen</div></div>
-        <div class="role-item"><div class="role-circle" style="background:#3ba55c"></div><div class="role-name">Člen</div><div class="role-members">Overený člen</div></div>
-        <div class="role-item"><div class="role-circle" style="background:#747f8d"></div><div class="role-name">Návštevník</div><div class="role-members">Nový príchod</div></div>
+        <div class="more"><p>Skroluj nižšie a zisti, kto sme, kto server vedie a ako sa pridať.</p></div>
       </div>
     </div>
   </div>
-
-  <!-- ══ TAB: ADMIN TICKETS ══ -->
-  <div class="tab-page fade-in" id="tab-admin">
-    <div class="admin-section" style="display:block">
-      <div class="section-title" style="margin-bottom:12px">Správa ticketov <span id="ticketCount" style="font-weight:400;margin-left:8px">0</span></div>
-      <div class="filter-bar">
-        <button class="filter-pill on" onclick="setFilter('all',this)">Všetky</button>
-        <button class="filter-pill" onclick="setFilter('open',this)">Otvorené</button>
-        <button class="filter-pill" onclick="setFilter('answered',this)">Zodpovedané</button>
-        <button class="filter-pill" onclick="setFilter('closed',this)">Zatvorené</button>
-      </div>
-      <div class="ticket-list" id="adminList">
-        <div class="no-data">Načítavam tickety...</div>
-      </div>
-      <div class="ticket-detail" id="adminDetail">
-        <div class="td-header">
-          <div>
-            <div class="td-name" id="ad-name"></div>
-            <div class="td-meta" id="ad-meta"></div>
-          </div>
-          <div class="td-actions">
-            <span class="status-tag" id="ad-tag"></span>
-            <button class="discord-btn btn-red" style="padding:5px 12px;font-size:.8125rem" onclick="closeTicket()">✕ Zavrieť ticket</button>
-          </div>
-        </div>
-        <div class="chat-log" id="adminLog"></div>
-        <div class="msg-input-bar">
-          <input type="text" id="adminMsgInput" placeholder="Napíš odpoveď..." maxlength="1000"
-            onkeydown="if(event.key==='Enter')sendAdmin()"/>
-          <button class="msg-send-btn" onclick="sendAdmin()" title="Odoslať">➤</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /page-wrap -->
-
-<!-- ══════ FOOTER ══════ -->
-<footer>
-  <div class="footer-brand">
-    <div class="footer-logo">⚡</div>
-    <span>© 2025 Hexera · Všetky práva vyhradené</span>
-  </div>
-  <div>
-    <a href="https://discord.gg/hHkWU8GKAA" target="_blank">discord.gg/hHkWU8GKAA</a>
-  </div>
-</footer>
-
-<!-- Admin bar -->
-<div class="admin-bar">
-  <div class="admin-bar-inner">
-    <span class="admin-bar-label">🔧 Admin mód aktívny</span>
-    <button class="discord-btn btn-gray" style="padding:5px 12px;font-size:.8125rem" onclick="logoutAdmin()">Odhlásiť</button>
-  </div>
+</main>
+<button class="fab" data-open="m-menu" aria-label="Menu"><span class="burger" aria-hidden="true"></span></button>
+<div class="site">
+<section id="o-nas"><span class="eyebrow">01 · O nás</span><h2>O Keksland</h2><p>Keksland je Discord server, kde sa stretávame, rozprávame a hráme spolu. Vznikol v roku 2024 a dnes ho tvorí viac ako 500 členov.</p><p>Záleží nám na pohodovej atmosfére, férovom prístupe a rýchlej pomoci. Keď niečo potrebuješ, tím je ti na dosah cez ticket.</p>
+<div class="grid g4"><div class="box"><b data-count="500">500+</b>členov</div><div class="box" id="onb" hidden><b id="online">0</b>online práve teraz</div><div class="box"><b>2024</b>rok vzniku</div><div class="box"><b>5,0 ★</b>hodnotenie supportu</div></div>
+<ol class="tl"><li><b>2024</b> Vznik servera a prví členovia</li><li><b>2025</b> Komunita rastie, pribúda tím</li><li><b>2026</b> Viac ako 500 členov</li></ol></section>
+<section id="znacka"><span class="eyebrow">02 · Značka</span><h2>Sme nezávislá značka</h2><p>Keksland je samostatná komunita. Nepripájame sa k organizáciám ani serverom, ktoré nie sú naše alebo nepatria pod nás, a neprevádzkujeme ani nezastupujeme iné servery.</p>
+<div class="grid g2"><div class="box"><h2>Nezávislosť</h2><p>Keksland patrí len svojej komunite a tímu.</p></div><div class="box"><h2>Partneri, nie súčasť</h2><p>Partnerov máme, ale nie sme ich súčasť a nezodpovedáme za nich ani za to, čo sa im deje.</p></div><div class="box"><h2>Pozor na kópie</h2><p>Server, ktorý sa tvári, že patrí pod nás, nie je náš. Pozvánka na tejto stránke je jediná oficiálna.</p></div><div class="box"><h2>Náš bot</h2><p>Máme jedného vlastného oficiálneho bota. Iný oficiálny bot Keksland neexistuje.</p><p class="botid">ID bota: <code>1532495014599458949</code></p><a class="lnk" href="https://discord.com/users/1532495014599458949" target="_blank" rel="noopener">Zobraziť profil bota ↗</a></div></div></section>
+<section id="pravidla"><span class="eyebrow">03 · Pravidlá</span><h2>Základné pravidlá</h2><ol class="rules"><li><b>Rešpekt.</b> K ostatným sa správaj tak, ako chceš, aby sa správali k tebe.</li><li><b>Bez spamu.</b> Reklama a pozvánky na iné servery len s povolením tímu.</li><li><b>Bez nenávisti.</b> Nevhodný, nenávistný ani urážlivý obsah tu nemá miesto.</li><li><b>Správny kanál.</b> Píš tam, kam téma patrí, aby sa všetko dalo nájsť.</li><li><b>Súkromie.</b> Nezdieľaj osobné údaje svoje ani cudzie bez súhlasu.</li><li><b>Zákonnosť.</b> Nezdieľaj obsah, ktorý porušuje zákon, autorské práva alebo pravidlá Discordu.</li><li><b>Bez zámeny.</b> Nevydávaj sa za tím, za iných ľudí, za iné servery ani za nášho bota.</li><li><b>Tím má pravdu.</b> Riaď sa pokynmi tímu, výhrady riešime cez ticket.</li><li><b>Zodpovednosť.</b> Server nezodpovedá za ľudí, ktorí urobili niečo zlé inde. Riešime to len vtedy, ak sa to prejaví u nás v komunite, ohrozuje tím alebo meno a stav servera.</li></ol><button class="btn" data-open="m-rules">Celé pravidlá</button></section>
+<section id="zakony"><span class="eyebrow">04 · Zákony</span><h2>Zákony a pravidlá Discordu</h2><p>Na serveri platia zákony a pravidlá platformy. Tu nájdeš oficiálne zdroje.</p><h3 class="sub">Zákony</h3><div class="grid g3"><a class="box lk" href="https://europa.eu/european-union/law_en" target="_blank" rel="noopener"><small>Európska únia</small><strong>Právo EÚ</strong><span>europa.eu ↗</span></a><a class="box lk" href="https://www.justice.gov.sk/Stranky/Zakony/Zbierka-zakonov.aspx" target="_blank" rel="noopener"><small>Slovensko</small><strong>Zbierka zákonov SR</strong><span>justice.gov.sk ↗</span></a><a class="box lk" href="https://www.psp.cz/sqw/sbirka.sqw" target="_blank" rel="noopener"><small>Česko</small><strong>Sbírka zákonů ČR</strong><span>psp.cz ↗</span></a></div><h3 class="sub">Discord</h3><div class="grid g2"><a class="box lk" href="https://discord.com/terms" target="_blank" rel="noopener"><small>Discord</small><strong>Podmienky používania</strong><span>discord.com/terms ↗</span></a><a class="box lk" href="https://discord.com/guidelines" target="_blank" rel="noopener"><small>Discord</small><strong>Zásady komunity</strong><span>discord.com/guidelines ↗</span></a></div><p class="avg">Odkazy vedú na externé stránky, za ich obsah nezodpovedáme.</p></section>
+<section id="tim"><span class="eyebrow">05 · Tím</span><h2>Tím servera</h2><p>Server drží pohromade malý tím ľudí, ktorí sa starajú o poriadok, pomoc členom a fungovanie Keksland. Klikni na meno a zobrazí sa rola s popisom.</p><div class="grid g3"><button class="box m" data-m="Coffekokes|Owner|Zakladateľ a majiteľ servera Keksland. Má posledné slovo pri dôležitých rozhodnutiach a určuje smerovanie komunity.|1. februára 2024|2024-02-01"><small>Owner</small><b>Coffekokes</b><span class="since">V tíme od 1. 2. 2024</span></button><button class="box m" data-m="NotLucas|Co-Owner|Spolumajiteľ servera. Podieľa sa na vedení Keksland a na rozhodnutiach o jeho fungovaní.|5. augusta 2026|2026-08-05"><small>Co-Owner</small><b>NotLucas</b><span class="since">V tíme od 5. 8. 2026</span></button><button class="box m" data-m="Mareček|Sr Admin|Senior admin. Dohliada na chod servera, pomáha adminom a moderátorom a rieši náročnejšie prípady.|26. marca 2025|2025-03-26"><small>Sr Admin</small><b>Mareček</b><span class="since">V tíme od 26. 3. 2025</span></button><button class="box m" data-m="PATRICIA|Admin|Admin. Stará sa o správu servera, jeho nastavenia a pomoc členom.|10. júla 2024|2024-07-10"><small>Admin</small><b>PATRICIA</b><span class="since">V tíme od 10. 7. 2024</span></button><button class="box m" data-m="rajče45456|Mod|Moderátor. Dbá na poriadok v kanáloch, odpovedá členom a ťažšie situácie posúva vyššie.|30. júla 2026|2026-07-30"><small>Mod</small><b>rajče45456</b><span class="since">V tíme od 30. 7. 2026</span></button><button class="box m" data-m="¿GHOSTWAKAN?|Mod|Moderátor. Dbá na poriadok v kanáloch, odpovedá členom a ťažšie situácie posúva vyššie.|21. januára 2026|2026-01-21"><small>Mod</small><b>¿GHOSTWAKAN?</b><span class="since">V tíme od 21. 1. 2026</span></button></div></section>
+<section id="roly"><span class="eyebrow">06 · Roly</span><h2>Roly VIP a Creator</h2><div class="grid g2"><button class="box" data-open="m-vip"><h2>VIP</h2><p>Získaš ju ako výhru alebo za aktivitu. Prístup do VIP kanálov, GIFy v chate a ďalšie výhody.</p><span class="btn">Viac info</span></button><button class="box" data-open="m-creator"><h2>Creator</h2><p>Rola pre tvorcov obsahu. Platia jasné pravidlá a status je privilégium, nie nárok.</p><span class="btn">Viac info</span></button></div></section>
+<section id="faq"><span class="eyebrow">07 · FAQ</span><h2>Časté otázky</h2><div><details><summary>Ako sa pripojím?</summary><p>Klikni na Pripojiť sa a potvrď pozvánku v Discorde.</p></details><details><summary>Kde nájdem pravidlá?</summary><p>V okne Pravidlá alebo priamo na serveri v kanáli s pravidlami.</p></details><details><summary>Ako získam VIP alebo Creator rolu?</summary><p>VIP získaš ako výhru alebo za aktivitu na serveri. Status Creator udeľuje tím, podmienky nájdeš v okne pri role.</p></details><details><summary>Koho kontaktovať pri probléme?</summary><p>Napíš do kanála support na serveri, tím ti odpovie.</p></details><details><summary>Sme súčasťou inej organizácie?</summary><p>Nie. Keksland je nezávislá značka. Partnerov máme, ale nie sme ich súčasť a nezodpovedáme za nich.</p></details><details><summary>Rieši tím aj správanie mimo servera?</summary><p>Nie, za konanie mimo Keksland nezodpovedáme. Zasiahneme len vtedy, ak sa to prejaví u nás v komunite, ohrozuje tím alebo meno a stav servera.</p></details><details><summary>Máte oficiálneho bota?</summary><p>Áno, jedného vlastného. Jeho ID je 1532495014599458949. Iný oficiálny bot Keksland neexistuje.</p></details><details><summary>Ako funguje ticket?</summary><p>Otvoríš ticket, tím ti odpovie a po vyriešení môžeš support ohodnotiť hviezdičkami od 1 do 5.</p></details><details><summary>Môžem navrhnúť nápad?</summary><p>Jasne. Napíš nám cez support a tím sa na to pozrie.</p></details></div>
+<button class="btn" data-open="m-faq">Všetky otázky</button><button class="btn" data-open="m-support">Support</button></section>
+<section id="recenzie"><span class="eyebrow">08 · Hodnotenia</span><h2>Čo o nás hovoria členovia</h2><p>Po vyriešení ticketu nás členovia hodnotia. Toto sú posledné hodnotenia supportu.</p><div class="grid g3"><figure class="rev"><div class="stars" role="img" aria-label="5 z 5 hviezdičiek">★★★★★</div><figcaption><b>mejso_777_47393</b><small>Ticket #2 · 16. 8. 2026</small></figcaption></figure><figure class="rev"><div class="stars" role="img" aria-label="5 z 5 hviezdičiek">★★★★★</div><figcaption><b>mr.panterix_43499</b><small>Ticket #3 · 19. 8. 2026</small></figcaption></figure><figure class="rev"><div class="stars" role="img" aria-label="5 z 5 hviezdičiek">★★★★★</div><figcaption><b>lucasyuv</b><small>Ticket #6</small></figcaption></figure></div><p class="avg">Priemer <b>5,0 / 5</b> podľa 3 hodnotení supportu.</p></section>
+<section id="pridaj-sa"><span class="eyebrow">09 · Pripoj sa</span><h2>Ako sa pridať</h2><ol class="rules"><li>Klikni na Pripojiť sa.</li><li>Potvrď pozvánku v Discorde.</li><li>Prečítaj si pravidlá a predstav sa.</li></ol><a class="btn g" href="https://discord.gg/pzr5dYKvHZ" target="_blank" rel="noopener">Pripojiť sa na Discord</a><button class="btn" data-open="m-join">Skopírovať pozvánku</button></section>
+<footer><p>© 2026 Keksland 🍪</p><div class="foot"><a href="https://discord.gg/pzr5dYKvHZ" target="_blank" rel="noopener">Discord</a><a href="https://discord.com/channels/1204884655799799909/1541732662518222908/1541741458640605285" target="_blank" rel="noopener">Pravidlá</a><a href="https://discord.com/channels/1204884655799799909/1462161802350563543/1541743532191125524" target="_blank" rel="noopener">FAQ</a><a href="https://discord.com/channels/1204884655799799909/1534568175247822858/1551613013168099409" target="_blank" rel="noopener">Support</a><a href="https://discord.com/terms" target="_blank" rel="noopener">Podmienky Discordu</a><a href="https://discord.com/guidelines" target="_blank" rel="noopener">Zásady Discordu</a><a href="#">Späť hore ↑</a></div></footer>
 </div>
-
-<!-- Admin modal -->
-<div class="modal-bg" id="adminModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Prihlásiť sa</div>
-      <div class="modal-desc">Zadaj admin heslo pre správcovský prístup</div>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label class="field-label">Heslo</label>
-        <input type="password" class="field-input" id="adminPwdInput"
-          placeholder="••••••••••"
-          onkeydown="if(event.key==='Enter')doLogin()"/>
-      </div>
-      <div class="modal-error" id="adminErr"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="discord-btn btn-gray" onclick="closeAdminModal()">Zrušiť</button>
-      <button class="discord-btn btn-blurple" onclick="doLogin()">Prihlásiť sa</button>
-    </div>
-  </div>
-</div>
+<dialog id="m-join"><button class="x" data-close aria-label="Zavrieť">✕</button><h2>Pripoj sa ku Keksland</h2><ol><li>Otvor pozvánku.</li><li>Potvrď ju v Discorde.</li><li>Prečítaj si pravidlá a predstav sa.</li></ol><input id="inv" readonly value="https://discord.gg/pzr5dYKvHZ" aria-label="Pozvánka"><button class="btn" data-copy>Kopírovať</button><a class="btn g" href="https://discord.gg/pzr5dYKvHZ" target="_blank" rel="noopener">Otvoriť Discord</a></dialog>
+<dialog id="m-rules"><button class="x" data-close aria-label="Zavrieť">✕</button><h2>Pravidlá</h2><ol><li><b>Rešpekt.</b> K ostatným sa správaj tak, ako chceš, aby sa správali k tebe.</li><li><b>Bez spamu.</b> Reklama a pozvánky na iné servery len s povolením tímu.</li><li><b>Bez nenávisti.</b> Nevhodný, nenávistný ani urážlivý obsah tu nemá miesto.</li><li><b>Správny kanál.</b> Píš tam, kam téma patrí, aby sa všetko dalo nájsť.</li><li><b>Súkromie.</b> Nezdieľaj osobné údaje svoje ani cudzie bez súhlasu.</li><li><b>Zákonnosť.</b> Nezdieľaj obsah, ktorý porušuje zákon, autorské práva alebo pravidlá Discordu.</li><li><b>Bez zámeny.</b> Nevydávaj sa za tím, za iných ľudí, za iné servery ani za nášho bota.</li><li><b>Tím má pravdu.</b> Riaď sa pokynmi tímu, výhrady riešime cez ticket.</li><li><b>Zodpovednosť.</b> Server nezodpovedá za ľudí, ktorí urobili niečo zlé inde. Riešime to len vtedy, ak sa to prejaví u nás v komunite, ohrozuje tím alebo meno a stav servera.</li></ol><a class="btn g" href="https://discord.com/channels/1204884655799799909/1541732662518222908/1541741458640605285" target="_blank" rel="noopener">Celé pravidlá v Discorde</a></dialog>
+<dialog id="m-faq"><button class="x" data-close aria-label="Zavrieť">✕</button><h2>Časté otázky</h2><p>Najčastejšie otázky a odpovede máme zapísané priamo na serveri.</p><a class="btn g" href="https://discord.com/channels/1204884655799799909/1462161802350563543/1541743532191125524" target="_blank" rel="noopener">Otvoriť FAQ v Discorde</a></dialog>
+<dialog id="m-support"><button class="x" data-close aria-label="Zavrieť">✕</button><h2>Support</h2><p>Potrebuješ pomoc alebo chceš niečo nahlásiť? Náš tím ti rád pomôže.</p><a class="btn g" href="https://discord.com/channels/1204884655799799909/1534568175247822858/1551613013168099409" target="_blank" rel="noopener">Otvoriť support v Discorde</a></dialog>
+<dialog id="m-vip"><button class="x" data-close aria-label="Zavrieť">✕</button><h2>VIP</h2><p>VIP rolu získaš ako výhru alebo za aktivitu na serveri.</p><h3>Výhody</h3><ul><li>Prístup do VIP kanálov</li><li>Posielanie GIFov v chate</li><li>A ďalšie výhody na serveri</li></ul><a class="btn g" href="https://discord.gg/pzr5dYKvHZ" target="_blank" rel="noopener">Pripojiť sa na Discord</a></dialog>
+<dialog id="m-creator"><button class="x" data-close aria-label="Zavrieť">✕</button><h2>Creator</h2><p>Nariadenia pre všetkých tvorcov obsahu, ktorí zastupujú alebo sa zúčastňujú našej komunity. Od tvorcov sa očakáva profesionálne správanie a ochrana reputácie komunity.</p>
+<h3>1.0 Základné požiadavky</h3><ul><li>Dodržiavaj všetky <b>pravidlá servera a Podmienky služby Discordu</b>.</li><li>Obsah musí byť originálny alebo použitý s príslušným povolením.</li><li>Nesmieš úmyselne poškodzovať reputáciu komunity.</li></ul>
+<h3>1.1 Štandardy obsahu</h3><ul><li>Obsah musí byť vhodný, relevantný a nezavádzajúci.</li><li>NSFW, podvody, škodlivý alebo nelegálny obsah sú zakázané.</li><li>Falošné tvrdenia alebo zavádzajúca propagácia nie sú povolené.</li></ul>
+<h3>1.2 Propagácia</h3><ul><li>Propaguj len v určených kanáloch a podľa požiadaviek.</li><li><b>Reklama na @everyone je zakázaná</b>, pokiaľ nie je výslovne povolená.</li><li>Spam a nadmerná sebapropagácia sú zakázané.</li></ul>
+<h3>1.3 Status tvorcu</h3><ul><li>Status tvorcu je <b>privilégium, nie trvalý nárok</b>.</li><li>Tím môže status kedykoľvek udeliť, upraviť, pozastaviť alebo odobrať.</li><li>Porušenia môžu viesť k okamžitému odobratiu privilégií.</li></ul>
+<p><small>Status tvorcu neoslobodzuje nikoho od pravidiel servera ani rozhodnutí tímu.</small></p></dialog>
+<dialog id="m-menu"><button class="x" data-close aria-label="Zavrieť">✕</button><h2>Menu</h2><div class="mn"><a href="#o-nas" data-close>O nás</a><a href="#znacka" data-close>Značka</a><a href="#pravidla" data-close>Pravidlá</a><a href="#zakony" data-close>Zákony a Discord</a><a href="#tim" data-close>Tím</a><a href="#roly" data-close>VIP a Creator</a><a href="#faq" data-close>Časté otázky</a><a href="#recenzie" data-close>Recenzie</a><a class="g" href="#pridaj-sa" data-close>Pripojiť sa</a></div></dialog>
+<dialog id="m-member"><button class="x" data-close aria-label="Zavrieť">✕</button><div class="av" id="mav"></div><h2 id="mn"></h2><span class="eyebrow" id="mr"></span><p id="md"></p><div class="facts"><div><small>V tíme od</small><b id="ms"></b></div><div><small>Dĺžka v tíme</small><b id="ml"></b></div></div></dialog>
 
 <script>
-'use strict';
+(function(){
+  // spruce silhouettes on both shores
+  var g=document.getElementById('trees'),ns='http://www.w3.org/2000/svg',s=7;
+  function r(){s=(s*9301+49297)%233280;return s/233280}
+  function row(x0,x1,base,hMin,hMax,fill,taper){
+    for(var x=x0;x<x1;x+=14+r()*10){
+      var h=hMin+r()*(hMax-hMin);
+      if(taper){h*=Math.max(.15,1-Math.abs(x-taper[0])/taper[1])}
+      var w=h*.32,p=document.createElementNS(ns,'path');
+      p.setAttribute('d','M'+x+' '+base+' L'+(x+w/2)+' '+(base-h)+' L'+(x+w)+' '+base+'Z');
+      p.setAttribute('fill',fill);g.appendChild(p);
+    }
+  }
+  var b=document.createElementNS(ns,'path');
+  b.setAttribute('d','M0 470 Q300 420 560 545 L560 562 H0Z M1600 400 Q1300 420 1020 545 L1020 562 H1600Z');
+  b.setAttribute('fill','#1c3a2e');g.appendChild(b);
+  row(0,620,562,70,230,'#1f4232',[0,700]);
+  row(0,620,562,50,150,'#163326',[0,700]);
+  row(980,1600,562,80,300,'#1f4232',[1600,700]);
+  row(980,1600,562,50,180,'#163326',[1600,700]);
+  row(560,1020,562,8,26,'#163326');
 
-/* ══════════════════════════
-   SECURITY
-══════════════════════════ */
-const HASH = "a097de96c7295bb6f5f147cf749490c745e25e54127ebfa9de0d8af29e5b3919";
-
-async function sha256(s){
-  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
-}
-
-// Rate limiter
-const RL = (()=>{
-  const m={};
-  return { ok(k,max,ms){ const n=Date.now(); if(!m[k])m[k]=[]; m[k]=m[k].filter(t=>n-t<ms); if(m[k].length>=max)return false; m[k].push(n); return true; } };
+  // scroll-scrubbed intro
+  var st=document.getElementById('stage'),tick=false;
+  function upd(){
+    var max=st.offsetHeight-window.innerHeight,y=-st.getBoundingClientRect().top;
+    var p=Math.min(1,Math.max(0,y/(max*.8)));st.style.setProperty('--p',p.toFixed(4));st.classList.toggle('on',p>.6);document.body.classList.toggle('scrolled',p>.5);
+    tick=false;
+  }
+  addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(upd)}},{passive:true});
+  addEventListener('resize',upd);upd();
 })();
-
-// Safe text (XSS prevention)
-const st = (el,t) => { if(el) el.textContent = String(t??''); };
-
-// Sanitize input
-function san(s){ return String(s||'').replace(/[<>"'`]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;'}[c])); }
-
-// Danger pattern
-const DANGER = /<script|javascript:|on\w+\s*=/i;
-
-/* ══════════════════════════
-   NAV / TABS
-══════════════════════════ */
-function switchTab(id, btn){
-  document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.page-tab').forEach(b=>b.classList.remove('active'));
-  const p = document.getElementById('tab-'+id);
-  if(p){ p.classList.add('active'); p.classList.remove('fade-in'); void p.offsetWidth; p.classList.add('fade-in'); }
-  if(btn) btn.classList.add('active');
+</script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function fill(a){
+  $('mn').textContent=a[0];$('mr').textContent=a[1];$('md').textContent=a[2];
+  $('mav').textContent=(a[0].replace(/[^\p{L}\p{N}]/gu,'')[0]||'?').toUpperCase();
+  $('ms').textContent=a[3]||'–';
+  var d=new Date(a[4]),n=new Date(),m=(n.getFullYear()-d.getFullYear())*12+n.getMonth()-d.getMonth()-(n.getDate()<d.getDate()?1:0),y=Math.floor(m/12),r=m%12,p=[];
+  if(y>0)p.push(y+' '+(y==1?'rok':y<5?'roky':'rokov'));
+  if(r>0)p.push(r+' '+(r==1?'mesiac':r<5?'mesiace':'mesiacov'));
+  $('ml').textContent=isNaN(m)?'–':(p.join(' a ')||'menej ako mesiac');
 }
-
-/* ══════════════════════════
-   SYSTEMS STATUS
-══════════════════════════ */
-const SYS = ['bot','web','db','api'];
-const CYCLE = ['ok','warn','bad'];
-let sysState = {};
-
-function loadSys(){
-  try{ sysState = JSON.parse(localStorage.getItem('hx_sys')||'{}'); }catch{}
-  SYS.forEach(s=>{ if(!sysState[s]) sysState[s]='ok'; renderSys(s); });
-  updateBanner();
-  buildBars();
-}
-
-function saveSys(){ localStorage.setItem('hx_sys', JSON.stringify(sysState)); }
-
-function cycle(sys){
-  if(!document.body.classList.contains('admin')) return;
-  const i = CYCLE.indexOf(sysState[sys]||'ok');
-  sysState[sys] = CYCLE[(i+1)%CYCLE.length];
-  renderSys(sys);
-  saveSys();
-  updateBanner();
-  buildBars();
-}
-
-function renderSys(sys){
-  const el = document.getElementById('si-'+sys);
-  if(!el) return;
-  const s = sysState[sys]||'ok';
-  el.className = 'status-ind si-'+s;
-  const lbl = {ok:'Funkčný', warn:'Obmedzený', bad:'Výpadok'};
-  el.innerHTML = '<span class="si-dot"></span>'+lbl[s];
-}
-
-function updateBanner(){
-  const vals = SYS.map(s=>sysState[s]);
-  const banner = document.getElementById('heroBanner');
-  const title  = document.getElementById('heroTitle');
-  const sub    = document.getElementById('heroSub');
-  const inc    = document.getElementById('incidentsBox');
-  banner.className = 'hero-status-row';
-  if(vals.includes('bad')){
-    banner.classList.add('hsr-outage');
-    st(title,'Prebieha výpadok'); st(sub,'Niektoré systémy sú nedostupné. Pracujeme na riešení.');
-    st(inc,'⚠️ Prebieha výpadok jedného alebo viacerých systémov. Sledujte aktualizácie.');
-  } else if(vals.includes('warn')){
-    banner.classList.add('hsr-degraded');
-    st(title,'Čiastočné problémy'); st(sub,'Niektoré systémy majú problémy s výkonom.');
-    st(inc,'⚠️ Hlásime čiastočné problémy. Monitorujeme situáciu.');
-  } else {
-    banner.classList.add('hsr-operational');
-    st(title,'Všetky systémy sú funkčné'); st(sub,'Žiadne aktuálne problémy');
-    st(inc,'Žiadne aktívne incidenty. 🎉');
-  }
-  const now = new Date();
-  st(document.getElementById('lastUpdated'), 'Posledná aktualizácia: '+now.toLocaleString('sk-SK'));
-}
-
-function buildBars(){
-  SYS.forEach(sys=>{
-    const bar = document.getElementById('ub-'+sys);
-    if(!bar) return;
-    bar.innerHTML='';
-    const s = sysState[sys]||'ok';
-    for(let i=0;i<60;i++){
-      const b = document.createElement('div');
-      b.className = 'ub-block';
-      if(i===59){
-        b.classList.add('current');
-        b.classList.add(s==='ok'?'ok':s==='warn'?'warn':'bad');
-      } else {
-        const r=Math.random();
-        if(r<.02) b.classList.add('incident');
-        else if(r<.05) b.classList.add('degraded');
-      }
-      b.title=`Deň ${i+1}`;
-      bar.appendChild(b);
-    }
-  });
-}
-
-/* ══════════════════════════
-   ADMIN AUTH
-══════════════════════════ */
-let isAdmin = false;
-
-function openAdmin(){
-  document.getElementById('adminModal').classList.add('show');
-  document.getElementById('adminPwdInput').value='';
-  document.getElementById('adminErr').style.display='none';
-  setTimeout(()=>document.getElementById('adminPwdInput').focus(),80);
-}
-function closeAdminModal(){
-  document.getElementById('adminModal').classList.remove('show');
-}
-document.getElementById('adminModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeAdminModal(); });
-
-async function doLogin(){
-  if(!RL.ok('login',5,60000)){
-    showErr('adminErr','⚠️ Príliš veľa pokusov. Počkaj 1 minútu.'); return;
-  }
-  const pwd = document.getElementById('adminPwdInput').value;
-  const h = await sha256(pwd);
-  if(h===HASH){
-    closeAdminModal();
-    isAdmin=true;
-    document.body.classList.add('admin');
-    sessionStorage.setItem('hxa','1');
-    document.querySelector('.admin-tab').style.display='';
-    loadAdminTickets();
-  } else {
-    showErr('adminErr','❌ Nesprávne heslo');
-    document.getElementById('adminPwdInput').value='';
-    document.getElementById('adminPwdInput').focus();
-  }
-}
-
-function logoutAdmin(){
-  isAdmin=false;
-  document.body.classList.remove('admin');
-  sessionStorage.removeItem('hxa');
-  document.querySelector('.admin-tab').style.display='none';
-  if(unsubAdmin){ unsubAdmin(); unsubAdmin=null; }
-  currentTid=null;
-  switchTab('status',document.querySelector('.page-tab'));
-}
-
-function showErr(id,msg){
-  const el=document.getElementById(id);
-  if(!el)return;
-  el.textContent=msg; el.style.display='block';
-  setTimeout(()=>{ el.style.display='none'; },5000);
-}
-
-/* ══════════════════════════
-   TICKET FORM
-══════════════════════════ */
-function toggleForm(){
-  const f=document.getElementById('ticketForm');
-  f.classList.toggle('open');
-}
-
-function genId(){
-  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return 'HEX-'+Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');
-}
-
-async function submitTicket(){
-  if(!window._fb){ alert('Firebase nie je nastavený. Použi Discord: discord.gg/hHkWU8GKAA'); return; }
-  if(!RL.ok('sub',3,300000)){ showErr('f-err','Príliš veľa ticketov. Skús o 5 minút.'); return; }
-
-  const name = document.getElementById('f-name').value.trim();
-  const cat  = document.getElementById('f-cat').value;
-  const msg  = document.getElementById('f-msg').value.trim();
-
-  if(!name||name.length<2||name.length>50){ showErr('f-err','Zadaj platné Discord meno (2–50 znakov).'); return; }
-  if(!cat){ showErr('f-err','Vyber kategóriu.'); return; }
-  if(!msg||msg.length<20){ showErr('f-err','Popis musí mať aspoň 20 znakov.'); return; }
-  if(DANGER.test(name)||DANGER.test(msg)){ showErr('f-err','Neplatný vstup.'); return; }
-
-  const btn=document.getElementById('submitBtn');
-  btn.disabled=true; btn.textContent='Odosiela sa...';
-
-  try{
-    const {collection,addDoc,serverTimestamp}=window._fns;
-    const tid=genId();
-    await addDoc(collection(window._db,'tickets'),{
-      id:tid, name, category:cat, status:'open',
-      createdAt:serverTimestamp(),
-      messages:[{role:'user',name,text:msg,time:new Date().toISOString()}]
-    });
-    const out=document.getElementById('ticketIdOut');
-    st(out,tid);
-    window._lastTid=tid;
-    document.getElementById('formFields').style.display='none';
-    document.getElementById('ticketSuccess').style.display='block';
-  } catch(e){
-    btn.disabled=false; btn.textContent='📨 Odoslať ticket';
-    showErr('f-err','Chyba pri odosielaní. Skús znova.');
-  }
-}
-
-function copyId(){
-  const id=document.getElementById('ticketIdOut').textContent;
-  navigator.clipboard.writeText(id).then(()=>{
-    const el=document.getElementById('ticketIdOut');
-    const orig=el.textContent;
-    st(el,'Skopírované! ✓');
-    setTimeout(()=>st(el,orig),1500);
-  });
-}
-
-function goChecker(){
-  if(window._lastTid) document.getElementById('checkInput').value=window._lastTid;
-  switchTab('support', document.querySelectorAll('.page-tab')[1]);
-  if(window._lastTid) lookupTicket();
-  document.querySelector('.checker-wrap')?.scrollIntoView({behavior:'smooth'});
-}
-
-/* ══════════════════════════
-   TICKET CHECKER
-══════════════════════════ */
-let unsubUser=null;
-let currentUserTid=null;
-
-async function lookupTicket(){
-  if(!window._fb){ showErr('checkErr','Firebase nie je nastavený.'); return; }
-  if(!RL.ok('look',10,60000)){ showErr('checkErr','Príliš veľa pokusov.'); return; }
-  const raw=document.getElementById('checkInput').value.trim().toUpperCase();
-  if(!/^HEX-[A-Z2-9]{6}$/.test(raw)){ showErr('checkErr','Neplatný formát. Príklad: HEX-AB3X7Y'); return; }
-
-  if(unsubUser){ unsubUser(); unsubUser=null; }
-  try{
-    const {collection,query,where,onSnapshot}=window._fns;
-    const q=query(collection(window._db,'tickets'),where('id','==',raw));
-    unsubUser=onSnapshot(q,snap=>{
-      if(snap.empty){ showErr('checkErr','Ticket nenájdený. Skontroluj ID.'); return; }
-      const d=snap.docs[0];
-      currentUserTid=d.id;
-      renderUserTicket(d.data());
-    });
-  } catch(e){ showErr('checkErr','Chyba pri hľadaní.'); }
-}
-
-function renderUserTicket(data){
-  const v=document.getElementById('ticketView');
-  v.style.display='block';
-  document.getElementById('checkErr').style.display='none';
-  st(document.getElementById('tv-name'), data.name+' · '+data.id);
-  st(document.getElementById('tv-meta'), data.category+' · '+(data.createdAt?fmtTime(data.createdAt):''));
-  const tag=document.getElementById('tv-tag');
-  const tm={open:'tag-open',answered:'tag-answered',closed:'tag-closed'};
-  const tl={open:'OTVORENÝ',answered:'ZODPOVEDANÝ',closed:'ZATVORENÝ'};
-  tag.className='status-tag '+(tm[data.status]||'tag-open');
-  st(tag,tl[data.status]||data.status);
-  document.getElementById('userInputBar').style.display=data.status==='closed'?'none':'flex';
-  renderChat(document.getElementById('userLog'),data.messages||[],data.name||'');
-}
-
-async function sendUser(){
-  if(!window._fb||!currentUserTid) return;
-  if(!RL.ok('umsg',5,60000)){ alert('Príliš veľa správ.'); return; }
-  const inp=document.getElementById('userMsgInput');
-  const txt=inp.value.trim();
-  if(!txt||txt.length<1||DANGER.test(txt)) return;
-  try{
-    const {doc,getDoc,updateDoc}=window._fns;
-    const ref=doc(window._db,'tickets',currentUserTid);
-    const snap=await getDoc(ref);
-    if(!snap.exists()) return;
-    const data=snap.data();
-    if(data.status==='closed') return;
-    const msgs=[...data.messages||[],{role:'user',name:data.name,text:txt,time:new Date().toISOString()}];
-    await updateDoc(ref,{messages:msgs});
-    inp.value='';
-  } catch(e){ alert('Chyba.'); }
-}
-
-/* ══════════════════════════
-   CHAT RENDERER
-══════════════════════════ */
-function renderChat(container, messages, userName){
-  container.innerHTML='';
-  (messages||[]).forEach(m=>{
-    const isAdmin=m.role==='admin';
-    const g=document.createElement('div');
-    g.className='msg';
-
-    const av=document.createElement('div');
-    av.className='msg-av '+(isAdmin?'av-admin':'av-user');
-    av.textContent=isAdmin?'🔧':(m.name||userName||'?').charAt(0).toUpperCase();
-
-    const body=document.createElement('div');
-    body.className='msg-body';
-
-    const hdr=document.createElement('div');
-    hdr.className='msg-header';
-
-    const nm=document.createElement('span');
-    nm.className='msg-name '+(isAdmin?'admin-name':'user-name');
-    nm.textContent=isAdmin?'Hexera Admin':(m.name||userName);
-
-    if(isAdmin){
-      const badge=document.createElement('span');
-      badge.className='msg-badge';
-      badge.textContent='STAFF';
-      nm.appendChild(badge);
-    }
-
-    const ts=document.createElement('span');
-    ts.className='msg-timestamp';
-    ts.textContent=m.time?new Date(m.time).toLocaleString('sk-SK',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'';
-
-    const cnt=document.createElement('div');
-    cnt.className='msg-content';
-    cnt.textContent=m.text;
-
-    hdr.appendChild(nm); hdr.appendChild(ts);
-    body.appendChild(hdr); body.appendChild(cnt);
-    g.appendChild(av); g.appendChild(body);
-    container.appendChild(g);
-  });
-  container.scrollTop=container.scrollHeight;
-}
-
-/* ══════════════════════════
-   ADMIN TICKETS
-══════════════════════════ */
-let unsubAdmin=null;
-let currentTid=null;
-let allTickets=[];
-let curFilter='all';
-
-function loadAdminTickets(){
-  if(!window._fb){
-    document.getElementById('adminList').innerHTML='<div class="no-data">⚠️ Firebase nie je nastavený.</div>';
-    return;
-  }
-  const {collection,query,orderBy,onSnapshot}=window._fns;
-  const q=query(collection(window._db,'tickets'),orderBy('createdAt','desc'));
-  if(unsubAdmin) unsubAdmin();
-  unsubAdmin=onSnapshot(q,snap=>{
-    allTickets=snap.docs.map(d=>({_id:d.id,...d.data()}));
-    renderAdminList();
-    st(document.getElementById('ticketCount'), allTickets.length);
-    if(currentTid){
-      const t=allTickets.find(t=>t._id===currentTid);
-      if(t) renderDetail(t);
-    }
-  },err=>{
-    document.getElementById('adminList').innerHTML='<div class="no-data">Chyba: '+san(err.message)+'</div>';
-  });
-}
-
-function setFilter(f,btn){
-  curFilter=f;
-  document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  renderAdminList();
-}
-
-function renderAdminList(){
-  const list=document.getElementById('adminList');
-  let tix=allTickets;
-  if(curFilter!=='all') tix=tix.filter(t=>t.status===curFilter);
-  if(!tix.length){ list.innerHTML='<div class="no-data">📭 Žiadne tickety</div>'; return; }
-  list.innerHTML='';
-  tix.forEach(t=>{
-    const row=document.createElement('div');
-    row.className='ticket-row'+(t._id===currentTid?' sel':'');
-    row.onclick=()=>selectTicket(t);
-    const tm={open:'tag-open',answered:'tag-answered',closed:'tag-closed'};
-    const tl={open:'OTVORENÝ',answered:'ZODPOVEDANÝ',closed:'ZATVORENÝ'};
-    const last=(t.messages||[]).slice(-1)[0];
-    row.innerHTML=`
-      <div class="tr-av">${san((t.name||'?').charAt(0).toUpperCase())}</div>
-      <div class="tr-info">
-        <div class="tr-name">${san(t.name||'')} <span style="color:var(--text-muted);font-weight:400;font-size:.75rem">${san(t.id||'')}</span></div>
-        <div class="tr-preview">${san(last?.text||'')}</div>
-      </div>
-      <div class="tr-meta">
-        <span class="status-tag ${tm[t.status]||'tag-open'}">${tl[t.status]||t.status}</span>
-        <span class="tr-time">${t.createdAt?fmtTime(t.createdAt):''}</span>
-      </div>
-    `;
-    list.appendChild(row);
-  });
-}
-
-function selectTicket(t){
-  currentTid=t._id;
-  renderDetail(t);
-  renderAdminList();
-  document.getElementById('adminDetail').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-function renderDetail(data){
-  const panel=document.getElementById('adminDetail');
-  panel.style.display='block';
-  st(document.getElementById('ad-name'), data.name+' · '+data.id);
-  st(document.getElementById('ad-meta'), data.category+' · '+(data.createdAt?fmtTime(data.createdAt):''));
-  const tag=document.getElementById('ad-tag');
-  const tm={open:'tag-open',answered:'tag-answered',closed:'tag-closed'};
-  const tl={open:'OTVORENÝ',answered:'ZODPOVEDANÝ',closed:'ZATVORENÝ'};
-  tag.className='status-tag '+(tm[data.status]||'tag-open');
-  st(tag,tl[data.status]||data.status);
-  renderChat(document.getElementById('adminLog'),data.messages||[],data.name||'');
-}
-
-async function sendAdmin(){
-  if(!window._fb||!currentTid) return;
-  const inp=document.getElementById('adminMsgInput');
-  const txt=inp.value.trim();
-  if(!txt||DANGER.test(txt)) return;
-  try{
-    const {doc,getDoc,updateDoc}=window._fns;
-    const ref=doc(window._db,'tickets',currentTid);
-    const snap=await getDoc(ref);
-    if(!snap.exists()) return;
-    const data=snap.data();
-    const msgs=[...data.messages||[],{role:'admin',text:txt,time:new Date().toISOString()}];
-    await updateDoc(ref,{messages:msgs,status:'answered'});
-    inp.value='';
-  } catch(e){ alert('Chyba.'); }
-}
-
-async function closeTicket(){
-  if(!window._fb||!currentTid) return;
-  if(!confirm('Naozaj zavrieť ticket?')) return;
-  try{
-    const {doc,updateDoc}=window._fns;
-    await updateDoc(doc(window._db,'tickets',currentTid),{status:'closed'});
-    document.getElementById('adminDetail').style.display='none';
-    currentTid=null;
-  } catch(e){ alert('Chyba.'); }
-}
-
-/* ══════════════════════════
-   HELPERS
-══════════════════════════ */
-function fmtTime(ts){
-  try{
-    const d=ts?.toDate?ts.toDate():new Date(ts);
-    return d.toLocaleDateString('sk-SK')+' '+d.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});
-  } catch{ return ''; }
-}
-
-/* ══════════════════════════
-   INIT
-══════════════════════════ */
-document.addEventListener('fb',()=>{
-  if(sessionStorage.getItem('hxa')==='1'){
-    isAdmin=true;
-    document.body.classList.add('admin');
-    document.querySelector('.admin-tab').style.display='';
-    loadAdminTickets();
-  }
+document.addEventListener('click',function(e){
+  var t=e.target,o=t.closest('[data-open]'),m=t.closest('[data-m]'),c=t.closest('[data-copy]');
+  if(o){$(o.dataset.open).showModal();return}
+  if(m){var a=m.dataset.m.split('|');fill(a);$('m-member').showModal();return}
+  if(t.closest('[data-close]')){t.closest('dialog').close();return}
+  if(c){var i=$('inv');i.select();try{navigator.clipboard.writeText(i.value)}catch(_){try{document.execCommand('copy')}catch(_){}}c.textContent='Skopírované';return}
+  if(t.tagName==='DIALOG'){var r=t.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)t.close()}
 });
-
-loadSys();
+var n=document.querySelector('[data-count]');
+if(!matchMedia('(prefers-reduced-motion:reduce)').matches)new IntersectionObserver(function(en,ob){
+  if(!en[0].isIntersecting)return;ob.disconnect();var s=performance.now();
+  (function f(now){var k=Math.min(1,(now-s)/1200);n.textContent=Math.round(500*k)+'+';if(k<1)requestAnimationFrame(f)})(s);
+}).observe(n);
+})();
+</script>
+<script>
+(function(){
+var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});
+document.querySelectorAll('.site>section').forEach(function(x){x.classList.add('rv-in');io.observe(x)});
+document.addEventListener('pointermove',function(e){var t=e.target.closest&&e.target.closest('.box,.c,.rev');if(t){var r=t.getBoundingClientRect();t.style.setProperty('--mx',(e.clientX-r.left)+'px');t.style.setProperty('--my',(e.clientY-r.top)+'px')}});
+fetch('https://discord.com/api/guilds/1204884655799799909/widget.json').then(function(r){return r.ok?r.json():Promise.reject()}).then(function(d){if(d&&d.presence_count!=null){document.getElementById('online').textContent=d.presence_count;document.getElementById('onb').hidden=false}}).catch(function(){});
+})();
 </script>
 </body>
 </html>
